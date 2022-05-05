@@ -1,6 +1,7 @@
 # https://scipython.com/blog/quadtrees-2-implementation-in-python/
 
 import numpy as np
+import matplotlib.patches as patches
 
 class Point:
     """A point located at (x,y) in 2D space.
@@ -12,6 +13,15 @@ class Point:
     def __init__(self, x, y, payload=None):
         self.x, self.y = x, y
         self.payload = payload
+
+    def __add__(self, o):
+        return Point(self.x + o.x, self.y + o.y)
+
+    def __sub__(self, o):
+        return Point(self.x - o.x, self.y - o.y)
+
+    def __mul__(self, o):
+        return Point(self.x*o, self.y*o)
 
     def __repr__(self):
         return '{}: {}'.format(str((self.x, self.y)), repr(self.payload))
@@ -26,16 +36,24 @@ class Point:
         return np.hypot(self.x - other_x, self.y - other_y)
 
 class Vector:
-    ...
+    def __init__(self, origin: Point, end_point: Point):
+        self.origin = origin
+        self.dir = end_point - origin
+        self.end_point = end_point
+
+    def draw(self, ax):
+        ax.arrow(self.origin.x, self.origin.y, self.dir.x, self.dir.y, width=1.5, alpha=0.4, length_includes_head=True)
+        # ax.scatter(self.end_point.x, self.end_point.y)
 
 class Rect:
     """A rectangle centred at (cx, cy) with width w and height h."""
 
-    def __init__(self, cx, cy, w, h):
+    def __init__(self, cx, cy, w, h, type=None):
         self.cx, self.cy = cx, cy
         self.w, self.h = w, h
         self.west_edge, self.east_edge = cx - w/2, cx + w/2
         self.north_edge, self.south_edge = cy - h/2, cy + h/2
+        self.type = type
 
     def __repr__(self):
         return str((self.west_edge, self.east_edge, self.north_edge,
@@ -65,11 +83,23 @@ class Rect:
                     other.north_edge > self.south_edge or
                     other.south_edge < self.north_edge)
 
+    def _get_color(self):
+        if (self.type == None): # Unknown
+            return 'c'
+        elif (self.type == "Free"):
+            return 'y'
+        elif (self.type == "Occupied"): # Occupied
+            return 'r'
+        else: # Divided rect
+            return None
+
     def draw(self, ax, c='k', lw=1, **kwargs):
         x1, y1 = self.west_edge, self.north_edge
         x2, y2 = self.east_edge, self.south_edge
-        ax.plot([x1,x2,x2,x1,x1],[y1,y1,y2,y2,y1], c=c, lw=lw, **kwargs)
 
+        rect = patches.Rectangle((x1, y1), x2, y2, linewidth=1, edgecolor='k', facecolor=self._get_color(), alpha=0.1)
+        # ax.plot([x1,x2,x2,x1,x1],[y1,y1,y2,y2,y1], c=c, lw=lw, **kwargs)
+        ax.add_patch(rect)
 
 class QuadTree:
     """A class implementing a quadtree."""
@@ -129,10 +159,12 @@ class QuadTree:
         if len(self.points) < self.max_points:
             # There's room for our point without dividing the QuadTree.
             self.points.append(point)
+            self.boundary.type = "Occupied"
             return True
 
         # No room: divide if necessary, then try the sub-quads.
         if not self.divided:
+            self.boundary.type = "Divided"
             self.divide()
 
         return (self.ne.insert(point) or
@@ -158,6 +190,11 @@ class QuadTree:
             self.ne.query(boundary, found_points)
             self.se.query(boundary, found_points)
             self.sw.query(boundary, found_points)
+        else:
+            if len(found_points) > 0:
+                boundary.type = "Occupied"
+            else:
+                boundary.type = "Free"
         return found_points
 
 
