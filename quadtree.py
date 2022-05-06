@@ -87,18 +87,22 @@ class Rect:
         if (self.type == None): # Unknown
             return 'c'
         elif (self.type == "Free"):
-            return 'y'
-        elif (self.type == "Occupied"): # Occupied
+            return 'g'
+        elif (self.type == "Occupied"):  # Occupied
             return 'r'
-        else: # Divided rect
-            return None
+        elif (self.type == "Divided"): # Divided rect
+            return 'none'
+        else:
+            return 'b'
 
     def draw(self, ax, c='k', lw=1, **kwargs):
         x1, y1 = self.west_edge, self.north_edge
         x2, y2 = self.east_edge, self.south_edge
 
-        rect = patches.Rectangle((x1, y1), x2, y2, linewidth=1, edgecolor='k', facecolor=self._get_color(), alpha=0.1)
+        rect = patches.Rectangle((x1, y1), x2-x1, y2-y1, linewidth=1, edgecolor='k', facecolor=self._get_color(), alpha=0.7)
         # ax.plot([x1,x2,x2,x1,x1],[y1,y1,y2,y2,y1], c=c, lw=lw, **kwargs)
+        # rect = patches.Rectangle((x1, y1), x2-x1, y2-y1, linewidth=1, edgecolor='k', alpha=0.1)
+
         ax.add_patch(rect)
 
 class QuadTree:

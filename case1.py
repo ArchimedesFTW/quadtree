@@ -26,7 +26,7 @@ for i in range(N):
     vectors.append(Vector(start_point, end_point))
     points.append(end_point)
 
-domain = Rect(width/2, height/2, width, height)
+domain = Rect(width/2, height/2, width, height, type="divided")
 qtree = QuadTree(domain, 3)
 for point in points:
     qtree.insert(point)
@@ -53,7 +53,7 @@ print('Number of found points =', len(found_points))
 ax.scatter([p.x for p in found_points], [p.y for p in found_points],
            facecolors='none', edgecolors='r', s=32)
 
-region.draw(ax, c='r')
+# region.draw(ax, c='r')
 
 ax.invert_yaxis()
 plt.tight_layout()
