@@ -51,6 +51,7 @@ class Rect:
     def __init__(self, cx, cy, w, h, type=None):
         self.cx, self.cy = cx, cy
         self.w, self.h = w, h
+        self.area = w*h
         self.west_edge, self.east_edge = cx - w/2, cx + w/2
         self.north_edge, self.south_edge = cy - h/2, cy + h/2
         self.type = type
@@ -99,8 +100,10 @@ class Rect:
         x1, y1 = self.west_edge, self.north_edge
         x2, y2 = self.east_edge, self.south_edge
 
-        rect = patches.Rectangle((x1, y1), x2-x1, y2-y1, linewidth=1, edgecolor='k', facecolor=self._get_color(), alpha=0.7)
+        rect = patches.Rectangle((x1, y1), x2-x1, y2-y1, linewidth=1, edgecolor='k', facecolor=self._get_color(), alpha=0.8)
         # ax.plot([x1,x2,x2,x1,x1],[y1,y1,y2,y2,y1], c=c, lw=lw, **kwargs)
+        if self.type == "room":
+            rect = patches.Rectangle((x1, y1), x2-x1, y2-y1, linewidth=2, edgecolor='k', facecolor='none', alpha=1)
         # rect = patches.Rectangle((x1, y1), x2-x1, y2-y1, linewidth=1, edgecolor='k', alpha=0.1)
 
         ax.add_patch(rect)
