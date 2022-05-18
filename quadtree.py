@@ -157,7 +157,7 @@ class QuadTree:
                                     self.max_points, self.depth + 1)
         self.divided = True
 
-    def insert(self, point):
+    def insert(self, point, type="Occupied"):
         """Try to insert Point point into this QuadTree."""
 
         if not self.boundary.contains(point):
@@ -174,10 +174,10 @@ class QuadTree:
             self.boundary.type = "Divided"
             self.divide()
 
-        return (self.ne.insert(point) or
-                self.nw.insert(point) or
-                self.se.insert(point) or
-                self.sw.insert(point))
+        return (self.ne.insert(point, type) or
+                self.nw.insert(point, type) or
+                self.se.insert(point, type) or
+                self.sw.insert(point, type))
 
     def query(self, boundary, found_points):
         """Find the points in the quadtree that lie within boundary."""

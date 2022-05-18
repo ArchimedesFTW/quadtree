@@ -10,7 +10,7 @@ random.seed(123)
 random.random()
 width, height = 600, 400
 
-N = 10
+N = 20
 coords = np.random.randn(N, 2) * height/3 + (width/2, height/2)
 # points = [Point(*coord) for coord in coords]
 
