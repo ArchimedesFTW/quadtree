@@ -80,9 +80,12 @@ for area in inside_areas:
 
 
 domain = Rect(width/2, height/2, width, height, type="divided")
-qtree = QuadTree(domain, 1)
-for point in points:
-    qtree.insert(point)
+qtree = QuadTree(domain, 0, 3)
+# for point in points:
+#     qtree.insert(point)
+
+for vec in vectors:
+        vec.division(qtree)
 
 print('Number of points in the domain =', len(qtree))
 plt.clf()
@@ -104,7 +107,7 @@ qtree.draw(ax)
 for vector in vectors:
     vector.draw(ax)
 
-ax.scatter([p.x for p in points], [p.y for p in points], s=4)
+ax.scatter([p.x for p in points], [p.y for p in points], s=1, alpha=0.05)
 ax.set_xticks([])
 ax.set_yticks([])
 

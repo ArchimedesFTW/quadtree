@@ -23,6 +23,9 @@ class Point:
     def __mul__(self, o):
         return Point(self.x*o, self.y*o)
 
+    def __truediv__(self, o):
+        return Point(self.x/o, self.y/o)
+
     def __repr__(self):
         return '{}: {}'.format(str((self.x, self.y)), repr(self.payload))
     def __str__(self):
@@ -38,12 +41,34 @@ class Point:
 class Vector:
     def __init__(self, origin: Point, end_point: Point):
         self.origin = origin
-        self.dir = end_point - origin
+        self.dir = (end_point - origin) / end_point.distance_to(origin)
         self.end_point = end_point
 
     def draw(self, ax):
         ax.arrow(self.origin.x, self.origin.y, self.dir.x, self.dir.y, width=1.5, alpha=0.4, length_includes_head=True)
         # ax.scatter(self.end_point.x, self.end_point.y)
+
+    def division(self, quadtree):
+        # point = self.origin
+        # length = self.origin.distance_to(self.end_point)
+        rectangle = quadtree.insert(self.origin, "Free") # origin = free
+        end_rectangle = quadtree.insert(self.end_point, "Occupied") #end-point = occupied
+        while rectangle != end_rectangle:
+            Ax = self.origin.x
+            Ay = self.origin.y
+            Bx = self.end_point.x
+            By = self.end_point.y
+            rX = rectangle.w
+            rY = rectangle.h
+            Cy = By + rY / 2 # this line needs to change
+            Cx = (Bx + ((Ax - Bx) / (Ay - By)) * Cy)
+            point = Point(Cx, Cy) + self.dir*0.001
+            rectangle = quadtree.insert(point, "Free")
+            print("Added ("+str(point.x)+", "+str(point.y)+")")
+
+        # for i in range(0, int(length) - 1):
+        #     quadtree.insert(point, "Free")
+        #     point = self.origin + self.dir*i
 
 class Rect:
     """A rectangle centred at (cx, cy) with width w and height h."""
@@ -160,14 +185,17 @@ class QuadTree:
     def insert(self, point, type="Occupied"):
         """Try to insert Point point into this QuadTree."""
 
+        if self.boundary.type == type:
+            return self.boundary
+
         if not self.boundary.contains(point):
             # The point does not lie inside boundary: bail.
             return False
-        if len(self.points) < self.max_points:
+        if len(self.points) < self.max_points or self.depth == 10:
             # There's room for our point without dividing the QuadTree.
             self.points.append(point)
-            self.boundary.type = "Occupied"
-            return True
+            self.boundary.type = type
+            return self.boundary
 
         # No room: divide if necessary, then try the sub-quads.
         if not self.divided:
