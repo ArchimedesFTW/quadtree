@@ -10,7 +10,7 @@ random.seed(123)
 random.random()
 width, height = 600, 400
 
-N = 20
+N = 50
 coords = np.random.randn(N, 2) * height/3 + (width/2, height/2)
 # points = [Point(*coord) for coord in coords]
 
@@ -80,14 +80,19 @@ for area in inside_areas:
 
 
 domain = Rect(width/2, height/2, width, height, type="divided")
-qtree = QuadTree(domain, 0, 3)
+qtree = QuadTree(domain, 0, 0)
 # for point in points:
 #     qtree.insert(point)
 
+print(f'Inserting {len(vectors)} vectors...')
 for vec in vectors:
         vec.division(qtree)
-
 print('Number of points in the domain =', len(qtree))
+
+print('Increasing squares to higher depth...')
+qtree.increase_squares()
+
+print('Plotting...')
 plt.clf()
 fig = plt.figure(figsize=(700/DPI, 500/DPI), dpi=DPI)
 ax = plt.subplot()
@@ -104,17 +109,17 @@ for area in inside_areas:
 
 qtree.draw(ax)
 # Draw graph
-for vector in vectors:
-    vector.draw(ax)
+# for vector in vectors:
+#     vector.draw(ax)
 
-ax.scatter([p.x for p in points], [p.y for p in points], s=1, alpha=0.05)
+# ax.scatter([p.x for p in points], [p.y for p in points], s=1, alpha=0.05)
 ax.set_xticks([])
 ax.set_yticks([])
 
-region = Rect(width/2, height/2, width, height)
-found_points = []
-qtree.query(region, found_points)
-print('Number of found points =', len(found_points))
+# region = Rect(width/2, height/2, width, height)
+# found_points = []
+# qtree.query(region, found_points)
+# print('Number of found points =', len(found_points))
 #
 # ax.scatter([p.x for p in found_points], [p.y for p in found_points],
 #            facecolors='none', edgecolors='r', s=32)

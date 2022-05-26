@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.patches as patches
 
+
 class Point:
     """A point located at (x,y) in 2D space.
 
@@ -21,13 +22,14 @@ class Point:
         return Point(self.x - o.x, self.y - o.y)
 
     def __mul__(self, o):
-        return Point(self.x*o, self.y*o)
+        return Point(self.x * o, self.y * o)
 
     def __truediv__(self, o):
-        return Point(self.x/o, self.y/o)
+        return Point(self.x / o, self.y / o)
 
     def __repr__(self):
         return '{}: {}'.format(str((self.x, self.y)), repr(self.payload))
+
     def __str__(self):
         return 'P({:.2f}, {:.2f})'.format(self.x, self.y)
 
@@ -37,6 +39,7 @@ class Point:
         except AttributeError:
             other_x, other_y = other
         return np.hypot(self.x - other_x, self.y - other_y)
+
 
 class Vector:
     def __init__(self, origin: Point, end_point: Point):
@@ -49,26 +52,13 @@ class Vector:
         # ax.scatter(self.end_point.x, self.end_point.y)
 
     def division(self, quadtree):
-        # point = self.origin
-        # length = self.origin.distance_to(self.end_point)
-        rectangle = quadtree.insert(self.origin, "Free") # origin = free
-        end_rectangle = quadtree.insert(self.end_point, "Occupied") #end-point = occupied
-        while rectangle != end_rectangle:
-            Ax = self.origin.x
-            Ay = self.origin.y
-            Bx = self.end_point.x
-            By = self.end_point.y
-            rX = rectangle.w
-            rY = rectangle.h
-            Cy = By + rY / 2 # this line needs to change
-            Cx = (Bx + ((Ax - Bx) / (Ay - By)) * Cy)
-            point = Point(Cx, Cy) + self.dir*0.001
-            rectangle = quadtree.insert(point, "Free")
-            print("Added ("+str(point.x)+", "+str(point.y)+")")
+        point = self.origin
+        length = self.origin.distance_to(self.end_point)
+        for i in range(0, int(length) - 1):
+            quadtree.insert(point, "Free")
+            point = self.origin + self.dir * i
+        quadtree.insert(self.end_point, "Occupied")
 
-        # for i in range(0, int(length) - 1):
-        #     quadtree.insert(point, "Free")
-        #     point = self.origin + self.dir*i
 
 class Rect:
     """A rectangle centred at (cx, cy) with width w and height h."""
@@ -76,18 +66,18 @@ class Rect:
     def __init__(self, cx, cy, w, h, type=None):
         self.cx, self.cy = cx, cy
         self.w, self.h = w, h
-        self.area = w*h
-        self.west_edge, self.east_edge = cx - w/2, cx + w/2
-        self.north_edge, self.south_edge = cy - h/2, cy + h/2
+        self.area = w * h
+        self.west_edge, self.east_edge = cx - w / 2, cx + w / 2
+        self.north_edge, self.south_edge = cy - h / 2, cy + h / 2
         self.type = type
 
     def __repr__(self):
         return str((self.west_edge, self.east_edge, self.north_edge,
-                self.south_edge))
+                    self.south_edge))
 
     def __str__(self):
         return '({:.2f}, {:.2f}, {:.2f}, {:.2f})'.format(self.west_edge,
-                    self.north_edge, self.east_edge, self.south_edge)
+                                                         self.north_edge, self.east_edge, self.south_edge)
 
     def contains(self, point):
         """Is point (a Point object or (x,y) tuple) inside this Rect?"""
@@ -98,7 +88,7 @@ class Rect:
             point_x, point_y = point
 
         return (point_x >= self.west_edge and
-                point_x <  self.east_edge and
+                point_x < self.east_edge and
                 point_y >= self.north_edge and
                 point_y < self.south_edge)
 
@@ -110,13 +100,13 @@ class Rect:
                     other.south_edge < self.north_edge)
 
     def _get_color(self):
-        if (self.type == None): # Unknown
+        if (self.type == None):  # Unknown
             return 'c'
         elif (self.type == "Free"):
             return 'g'
         elif (self.type == "Occupied"):  # Occupied
             return 'r'
-        elif (self.type == "Divided"): # Divided rect
+        elif (self.type == "Divided"):  # Divided rect
             return 'none'
         else:
             return 'b'
@@ -125,13 +115,15 @@ class Rect:
         x1, y1 = self.west_edge, self.north_edge
         x2, y2 = self.east_edge, self.south_edge
 
-        rect = patches.Rectangle((x1, y1), x2-x1, y2-y1, linewidth=1, edgecolor='k', facecolor=self._get_color(), alpha=0.8)
+        rect = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=1, edgecolor='k', facecolor=self._get_color(),
+                                 alpha=0.8)
         # ax.plot([x1,x2,x2,x1,x1],[y1,y1,y2,y2,y1], c=c, lw=lw, **kwargs)
         if self.type == "room":
-            rect = patches.Rectangle((x1, y1), x2-x1, y2-y1, linewidth=2, edgecolor='k', facecolor='none', alpha=1)
+            rect = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2, edgecolor='k', facecolor='none', alpha=1)
         # rect = patches.Rectangle((x1, y1), x2-x1, y2-y1, linewidth=1, edgecolor='k', alpha=0.1)
 
         ax.add_patch(rect)
+
 
 class QuadTree:
     """A class implementing a quadtree."""
@@ -161,8 +153,8 @@ class QuadTree:
         if not self.divided:
             return s
         return s + '\n' + '\n'.join([
-                sp + 'nw: ' + str(self.nw), sp + 'ne: ' + str(self.ne),
-                sp + 'se: ' + str(self.se), sp + 'sw: ' + str(self.sw)])
+            sp + 'nw: ' + str(self.nw), sp + 'ne: ' + str(self.ne),
+            sp + 'se: ' + str(self.se), sp + 'sw: ' + str(self.sw)])
 
     def divide(self):
         """Divide (branch) this node by spawning four children nodes."""
@@ -172,30 +164,34 @@ class QuadTree:
         # The boundaries of the four children nodes are "northwest",
         # "northeast", "southeast" and "southwest" quadrants within the
         # boundary of the current node.
-        self.nw = QuadTree(Rect(cx - w/2, cy - h/2, w, h),
-                                    self.max_points, self.depth + 1)
-        self.ne = QuadTree(Rect(cx + w/2, cy - h/2, w, h),
-                                    self.max_points, self.depth + 1)
-        self.se = QuadTree(Rect(cx + w/2, cy + h/2, w, h),
-                                    self.max_points, self.depth + 1)
-        self.sw = QuadTree(Rect(cx - w/2, cy + h/2, w, h),
-                                    self.max_points, self.depth + 1)
+        self.nw = QuadTree(Rect(cx - w / 2, cy - h / 2, w, h),
+                           self.max_points, self.depth + 1)
+        self.ne = QuadTree(Rect(cx + w / 2, cy - h / 2, w, h),
+                           self.max_points, self.depth + 1)
+        self.se = QuadTree(Rect(cx + w / 2, cy + h / 2, w, h),
+                           self.max_points, self.depth + 1)
+        self.sw = QuadTree(Rect(cx - w / 2, cy + h / 2, w, h),
+                           self.max_points, self.depth + 1)
         self.divided = True
 
     def insert(self, point, type="Occupied"):
         """Try to insert Point point into this QuadTree."""
 
-        if self.boundary.type == type:
-            return self.boundary
-
         if not self.boundary.contains(point):
             # The point does not lie inside boundary: bail.
             return False
-        if len(self.points) < self.max_points or self.depth == 10:
+
+        # Don't add a new point to this rectangle
+        if self.boundary.type == type:
+            return True
+
+        if len(self.points) < self.max_points or self.depth == 7:
             # There's room for our point without dividing the QuadTree.
             self.points.append(point)
-            self.boundary.type = type
-            return self.boundary
+
+            # Don't overwrite an occupied cell with a free cell
+            if self.boundary.type != "Occupied": self.boundary.type = type
+            return True
 
         # No room: divide if necessary, then try the sub-quads.
         if not self.divided:
@@ -232,7 +228,6 @@ class QuadTree:
                 boundary.type = "Free"
         return found_points
 
-
     def query_circle(self, boundary, centre, radius, found_points):
         """Find the points in the quadtree that lie within radius of centre.
 
@@ -265,16 +260,30 @@ class QuadTree:
         """Find the points in the quadtree that lie within radius of centre."""
 
         # First find the square that bounds the search circle as a Rect object.
-        boundary = Rect(*centre, 2*radius, 2*radius)
+        boundary = Rect(*centre, 2 * radius, 2 * radius)
         return self.query_circle(boundary, centre, radius, found_points)
 
+    def increase_squares(self):
+        if self.divided:
+            # Recursion, first goes to deepest layer and then keeps going up
+
+            # Can't immediately do if statement: Will result in early exit
+            types = {self.nw.increase_squares(), self.ne.increase_squares(),
+                     self.se.increase_squares(), self.sw.increase_squares()}
+            if len(types) == 1:
+                self.boundary.type = types.pop()
+
+                if self.boundary.type != "Divided": self.divided = False
+        # Check if all squares have same type,
+        # Check if all squares have the same type (not divided)
+        return self.boundary.type
 
     def __len__(self):
         """Return the number of points in the quadtree."""
 
         npoints = len(self.points)
         if self.divided:
-            npoints += len(self.nw)+len(self.ne)+len(self.se)+len(self.sw)
+            npoints += len(self.nw) + len(self.ne) + len(self.se) + len(self.sw)
         return npoints
 
     def draw(self, ax):
